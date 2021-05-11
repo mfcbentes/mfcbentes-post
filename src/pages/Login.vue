@@ -2,7 +2,7 @@
   <div id="login">
     <div class="loginArea" v-if="login">
       <h1>Entrar</h1>
-      <form>
+      <form v-on:submit.prevent="handleLogin">
         <input type="email" placeholder="mail@email.com" v-model="email" />
         <input type="password" placeholder="Sua senha..." v-model="senha" />
         <button type="submit">Acessar</button>
@@ -64,6 +64,26 @@ export default {
         .catch((error) => {
           console.log("Erro ao cadastrar: " + error);
         });
+
+      this.$router.push("/");
+    },
+    async handleLogin() {
+      const { user } = await firebase
+        .auth()
+        .signInWithEmailAndPassword(this.email, this.senha);
+
+      const userProfile = await firebase
+        .firestore()
+        .collection("users")
+        .doc(user.uid)
+        .get();
+
+      const usuarioLogado = {
+        uid: user.uid,
+        nome: userProfile.data().nome,
+      };
+
+      await localStorage.setItem("devPost", JSON.stringify(usuarioLogado));
 
       this.$router.push("/");
     },
