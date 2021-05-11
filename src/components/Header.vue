@@ -1,7 +1,7 @@
 <template>
   <header id="header">
-    <a>MfcbentesPost</a>
-    <button>Dashboard</button>
+    <router-link to="/">MfcbentesPost</router-link>
+    <router-link tag="button" to="/dashboard">Dashboard</router-link>
   </header>
 </template>
 
