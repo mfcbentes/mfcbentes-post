@@ -1,3 +1,9 @@
+#home {
+    display: flex;
+    flex-direction: row;
+    margin: 25px;
+  }
+  
 .newpost{
     height: 460px;
     background: #4C5059;
