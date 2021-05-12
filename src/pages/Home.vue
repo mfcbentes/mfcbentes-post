@@ -21,7 +21,7 @@
         <h1>{{ post.autor }}</h1>
         <p>{{ post.content | postLength }}</p>
         <div class="action-post">
-          <button>
+          <button v-on:click="likePost(post.id, post.likes)">
             {{ post.likes === 0 ? "Curtir" : post.likes + " curtida(s)" }}
           </button>
           <button>Veja o post completo</button>
@@ -51,6 +51,7 @@ export default {
     await firebase
       .firestore()
       .collection("posts")
+      .orderBy("created", "desc")
       .onSnapshot((doc) => {
         this.posts = [];
 
@@ -91,6 +92,42 @@ export default {
         })
         .catch((erro) => {
           console.log("Erro ao criar o post: " + erro);
+        });
+    },
+    async likePost(id, likes) {
+      const userId = this.user.uid;
+      const docId = `${userId}_${id}`;
+
+      const doc = await firebase
+        .firestore()
+        .collection("likes")
+        .doc(docId)
+        .get();
+
+      if (doc.exists) {
+        await firebase
+          .firestore()
+          .collection("posts")
+          .doc(id)
+          .update({
+            likes: likes - 1,
+          });
+
+        await firebase.firestore().collection("likes").doc(docId).delete();
+        return;
+      }
+
+      await firebase.firestore().collection("likes").doc(docId).set({
+        postId: id,
+        userId: userId,
+      });
+
+      await firebase
+        .firestore()
+        .collection("posts")
+        .doc(id)
+        .update({
+          likes: likes + 1,
         });
     },
   },
