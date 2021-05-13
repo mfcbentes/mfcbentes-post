@@ -47,6 +47,7 @@ export default {
   justify-content: center;
   align-items: center;
   margin-top: 60px;
+
   padding: 15px 20px;
   widows: 600px;
   max-width: 600px;
