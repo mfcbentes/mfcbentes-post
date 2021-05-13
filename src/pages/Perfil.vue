@@ -6,16 +6,27 @@
     <div v-else>
       <div class="headerPerfil">
         <h2>Olá, {{ nome }}!</h2>
-        <span>Já fez <strong>3</strong> posts.</span>
+        <span
+          >Já fez <strong>{{ this.posts.length }}</strong> posts.</span
+        >
       </div>
       <div class="postarea">
         <article class="post" v-for="post in posts" v-bind:key="post.id">
           <h1>{{ post.autor }}</h1>
-          <p>{{ post.content }}</p>
+          <p>{{ post.content | postLength }}</p>
           <div class="action-post">
-            <button>Veja o post completo</button>
+            <button v-on:click="tooglePostModal(post)">
+              Veja o post completo
+            </button>
           </div>
         </article>
+        <div>
+          <Modal
+            v-if="showPostModal"
+            v-bind:post="fullPost"
+            v-on:close="tooglePostModal()"
+          />
+        </div>
       </div>
     </div>
   </div>
@@ -23,6 +34,7 @@
 
 <script>
 import firebase from "../services/firebaseConnection";
+import Modal from "../components/Modal";
 
 export default {
   name: "Perfil",
@@ -37,7 +49,7 @@ export default {
     };
   },
   props: ["userid"],
-  components: {},
+  components: { Modal },
   async created() {
     const user = localStorage.getItem("devPost");
     this.user = JSON.parse(user);
@@ -62,9 +74,27 @@ export default {
         });
 
         this.nome = this.posts[0].autor;
+        this.loading = false;
       });
+  },
+  methods: {
+    tooglePostModal(post) {
+      this.showPostModal = !this.showPostModal;
+      if (this.showPostModal) {
+        this.fullPost = post;
+      } else {
+        this.fullPost = {};
+      }
+    },
+  },
+  filters: {
+    postLength(valor) {
+      if (valor.length < 70) {
+        return valor;
+      }
 
-    this.loading = false;
+      return `${valor.substring(0, 70)}...`;
+    },
   },
 };
 </script>
