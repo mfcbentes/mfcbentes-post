@@ -24,15 +24,25 @@
           <button v-on:click="likePost(post.id, post.likes)">
             {{ post.likes === 0 ? "Curtir" : post.likes + " curtida(s)" }}
           </button>
-          <button>Veja o post completo</button>
+          <button v-on:click="tooglePostModal(post)">
+            Veja o post completo
+          </button>
         </div>
       </article>
+      <div>
+        <Modal
+          v-if="showPostModal"
+          v-bind:post="fullPost"
+          v-on:close="tooglePostModal()"
+        />
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 import firebase from "../services/firebaseConnection";
+import Modal from "../components/Modal";
 
 export default {
   name: "Home",
@@ -42,6 +52,8 @@ export default {
       user: {},
       loading: true,
       posts: [],
+      showPostModal: false,
+      fullPost: {},
     };
   },
   async created() {
@@ -130,6 +142,14 @@ export default {
           likes: likes + 1,
         });
     },
+    tooglePostModal(post) {
+      this.showPostModal = !this.showPostModal;
+      if (this.showPostModal) {
+        this.fullPost = post;
+      } else {
+        this.fullPost = {};
+      }
+    },
   },
   filters: {
     postLength(valor) {
@@ -139,6 +159,9 @@ export default {
 
       return `${valor.substring(0, 70)}...`;
     },
+  },
+  components: {
+    Modal,
   },
 };
 </script>
