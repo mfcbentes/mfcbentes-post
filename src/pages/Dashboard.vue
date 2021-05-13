@@ -2,9 +2,14 @@
   <div id="dashboard">
     <h2>Minha conta</h2>
     <span>Atualize seu perfil</span>
-    <form>
+    <form v-on:click.prevent="updateProfile">
       <label>Nome:</label>
-      <input type="text" v-model="nome" id="name" />
+      <input
+        type="text"
+        v-model="nome"
+        v-bind:placeholder="user.nome"
+        id="name"
+      />
       <button class="button" type="submit">Atualizar perfil</button>
     </form>
     <button class="button logout" v-on:click="logOut">Sair</button>
@@ -19,7 +24,12 @@ export default {
   data() {
     return {
       nome: "",
+      user: {},
     };
+  },
+  created() {
+    const user = localStorage.getItem("devPost");
+    this.user = JSON.parse(user);
   },
   methods: {
     async logOut() {
@@ -35,6 +45,33 @@ export default {
       } else {
         return;
       }
+    },
+    async updateProfile() {
+      if (this.nome === "") {
+        return;
+      }
+
+      await firebase.firestore().collection("users").doc(this.user.uid).update({
+        nome: this.nome,
+      });
+
+      const postDocs = await firebase
+        .firestore()
+        .collection("posts")
+        .where("userId", "==", this.user.uid)
+        .get();
+
+      postDocs.forEach(async (doc) => {
+        await firebase.firestore().collection("posts").doc(doc.id).update({
+          autor: this.nome,
+        });
+      });
+
+      localStorage.setItem(
+        "devPost",
+        JSON.stringify({ uid: this.user.uid, nome: this.nome })
+      );
+      alert("Perfil atualizado com sucesso!");
     },
   },
 };
